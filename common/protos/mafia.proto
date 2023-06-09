@@ -1,0 +1,144 @@
+syntax = "proto3";
+package Mafia;
+
+import "google/protobuf/empty.proto";
+
+
+/////////// Main Lobby ///////////
+
+message CreateRoomRequest {
+    string name = 1;
+    uint32 game_size = 2;
+    string comment = 3;
+}
+
+message CreateRoomResponse {
+    string admin_token = 1;
+}
+
+message DeleteRoomRequest {
+    string room_name = 1;
+    string admin_token = 2;
+}
+
+message RoomDescription {
+    string name = 1;
+    string comment = 2;
+    uint32 num_players = 3;
+    uint32 game_size = 4;
+}
+
+message GetRoomListRequest {
+}
+
+message GetRoomListResponse {
+    repeated RoomDescription rooms = 1;
+}
+
+message JoinRoomRequest {
+    string room_name = 1;
+    string player_name = 2;
+    string player_token = 3;
+}
+
+message JoinRoomResponse {
+}
+
+
+/////////// Room ///////////
+
+message LeaveRoomRequest {
+    string room_name = 1;
+    string player_token = 2;
+}
+
+message GetPlayerListRequest {
+    string room_name = 1;
+}
+
+message PlayerDescription {
+    string name = 1;
+    bool is_ready = 2;
+}
+
+message GetPlayerListResponse {
+    repeated PlayerDescription players = 1;
+}
+
+message SignalIsReadyRequest {
+    string room_name = 1;
+    string player_token = 2;
+}
+
+/////////// Game ///////////
+
+enum Role {
+    Civilian = 0;
+    Mafia = 1;
+    Sheriff = 2;
+}
+
+enum Phase {
+    NightMafia = 0;
+    NightSheriff = 1;
+    Day = 2;
+}
+
+message Player  {
+    string name = 1;
+    uint32 votes_for = 2;
+    Role role = 3;
+    bool is_alive = 4;
+}
+
+message GameState {
+    Phase phase = 1;
+    repeated Player players = 2;
+    uint32 turn = 3;
+}
+
+message Slay {
+    string target_name = 1;
+}
+
+message Blame {
+    string target_name = 1;
+}
+
+message RandomMove {
+}
+
+message GameActionRequest {
+    string room_name = 1;
+    string player_token = 2;
+    Slay slay = 3;
+    Blame blame = 4;
+    RandomMove random_move = 5;
+}
+
+message GameActionResponse {
+    bool success = 1;
+    GameState game_state = 2;
+}
+
+message SubscribeOnNotificationsRequest {
+    string room_name = 1;
+    string player_token = 2;
+}
+
+message Notification {
+    repeated PlayerDescription players = 1;
+    GameState game_state = 2;
+    bool is_game_in_progress = 3;
+}
+
+service MafiaServer {
+    rpc CreateRoom(CreateRoomRequest) returns (CreateRoomResponse) {}
+    rpc DeleteRoom(DeleteRoomRequest) returns (google.protobuf.Empty) {}
+    rpc GetRoomList(GetRoomListRequest) returns (GetRoomListResponse) {}
+    rpc GetPlayerList(GetPlayerListRequest) returns (GetPlayerListResponse) {}
+    rpc JoinRoom(JoinRoomRequest) returns (google.protobuf.Empty) {}
+    rpc LeaveRoom(LeaveRoomRequest) returns (google.protobuf.Empty) {}
+    rpc SignalIsReady(SignalIsReadyRequest) returns (google.protobuf.Empty) {}
+    rpc SubscribeOnNotifications(SubscribeOnNotificationsRequest) returns (stream Notification) {}
+}

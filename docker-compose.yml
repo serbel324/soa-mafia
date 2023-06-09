@@ -1,0 +1,25 @@
+version: '3'
+services:
+  auth:
+    build: .
+    command: python3 -u auth.py
+    hostname: "auth_server"
+    ports:
+     - "5051:5051"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5051
+    volumes:
+     - .:/auth
+
+  mafia:
+    build: .
+    command: python3 -u mafia.py
+    hostname: "mafia_server"
+    ports:
+     - "5052:5052"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5052
+    volumes:
+     - .:/mafia
